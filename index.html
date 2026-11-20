@@ -1,0 +1,1946 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MIS NOTAS | Agenda Digital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563EB;
+      --primary-hover: #1D4ED8;
+      --bg-body: #F1F5F9;
+      --bg-card: #FFFFFF;
+      --bg-sidebar: #0F172A;
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+      --text-sidebar: #CBD5E1;
+      --border-color: #E2E8F0;
+      --danger: #EF4444;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 260px;
+      background-color: var(--bg-sidebar);
+      color: var(--text-sidebar);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      transition: transform 0.3s ease;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 8px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 20px;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #3B82F6, #6366F1);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .brand h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-nueva-nota {
+      background: linear-gradient(135deg, #2563EB, #4F46E5);
+      color: white;
+      border: none;
+      padding: 13px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+      transition: all 0.2s;
+      margin-bottom: 24px;
+    }
+
+    .btn-nueva-nota:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.45);
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+      color: var(--text-sidebar);
+    }
+
+    .nav-item:hover {
+      background-color: rgba(255,255,255,0.08);
+      color: #FFFFFF;
+    }
+
+    .nav-item.active {
+      background-color: var(--primary);
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    .nav-item-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-count {
+      background-color: rgba(255,255,255,0.12);
+      color: #FFFFFF;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    .nav-item.active .badge-count {
+      background-color: rgba(255,255,255,0.25);
+    }
+
+    /* MAIN CONTENT */
+    .main-wrapper {
+      flex: 1;
+      margin-left: 260px;
+      padding: 24px 32px;
+      max-width: 100%;
+    }
+
+    /* TOP BAR MOBILE */
+    .mobile-header {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-sidebar);
+      color: white;
+      padding: 14px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+
+    .btn-menu-toggle {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    /* DASHBOARD STATS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      padding: 16px 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stat-info span {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .stat-info strong {
+      display: block;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-top: 4px;
+    }
+
+    .stat-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    /* FILTERS & SEARCH BAR */
+    .controls-panel {
+      background: var(--bg-card);
+      padding: 16px 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 240px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 10px 14px 10px 38px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-box input:focus {
+      border-color: var(--primary);
+    }
+
+    .search-box svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .filters-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-select, .filter-date {
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text-main);
+      background-color: #F8FAFC;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .btn-clear-filters {
+      background: none;
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-clear-filters:hover {
+      background: #F1F5F9;
+      color: var(--text-main);
+    }
+
+    /* SECTION HEADER */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* NOTES GRID */
+    .notes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .note-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      border-top-width: 5px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+
+    .note-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .note-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .note-category-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      color: white;
+      display: inline-block;
+    }
+
+    .note-actions-top {
+      display: flex;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 6px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .icon-btn:hover {
+      background-color: #F1F5F9;
+      color: var(--text-main);
+    }
+
+    .icon-btn.fav-active {
+      color: #F59E0B;
+    }
+
+    .icon-btn.delete-btn:hover {
+      background-color: #FEE2E2;
+      color: var(--danger);
+    }
+
+    .note-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      line-height: 1.35;
+      cursor: pointer;
+    }
+
+    .note-title:hover {
+      color: var(--primary);
+    }
+
+    .note-preview {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 14px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      white-space: pre-line;
+    }
+
+    .note-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 14px;
+    }
+
+    .tag-pill {
+      font-size: 11px;
+      background-color: #F1F5F9;
+      color: #475569;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    .note-footer {
+      border-top: 1px solid var(--border-color);
+      padding-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .badges-group {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .priority-badge {
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    .prio-Alta { background: #FEE2E2; color: #B91C1C; }
+    .prio-Media { background: #FEF3C7; color: #B45309; }
+    .prio-Baja { background: #DCFCE7; color: #15803D; }
+
+    .status-badge {
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 11px;
+      background: #E2E8F0;
+      color: #334155;
+    }
+
+    .status-Finalizada { background: #D1FAE5; color: #065F46; }
+    .status-En-proceso { background: #DBEAFE; color: #1E40AF; }
+
+    /* CATEGORIES MANAGER VIEW */
+    .categories-panel {
+      background: var(--bg-card);
+      padding: 24px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      max-width: 700px;
+    }
+
+    .cat-form {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .cat-form input[type="text"] {
+      flex: 1;
+      min-width: 200px;
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .cat-form input[type="color"] {
+      width: 46px;
+      height: 42px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 2px;
+      background: white;
+    }
+
+    .cat-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .cat-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: #F8FAFC;
+    }
+
+    .cat-item-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .color-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+    }
+
+    /* MODALS */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 16px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--bg-card);
+      width: 100%;
+      max-width: 650px;
+      border-radius: 16px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      animation: modalFadeIn 0.2s ease-out;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .autosave-indicator {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .form-control {
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+    }
+
+    textarea.form-control {
+      min-height: 140px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .form-row-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .meta-dates {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: #F8FAFC;
+      padding: 10px 12px;
+      border-radius: 8px;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: #F8FAFC;
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary {
+      background: #E2E8F0;
+      color: #334155;
+    }
+
+    .btn-secondary:hover {
+      background: #CBD5E1;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    /* TOAST NOTIFICATIONS */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      background: #1E293B;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 500;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideIn 0.25s ease-out;
+    }
+
+    .toast.success { border-left: 4px solid var(--success); }
+    .toast.error { border-left: 4px solid var(--danger); }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* EMPTY STATE & LOADER */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      grid-column: 1 / -1;
+    }
+
+    .loader-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.85);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 500;
+      gap: 12px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #E2E8F0;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 860px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-wrapper {
+        margin-left: 0;
+        padding: 16px;
+      }
+      .mobile-header {
+        display: flex;
+      }
+      body {
+        flex-direction: column;
+      }
+      .form-row-3, .form-row-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* =========================================================
+       MIS NOTAS 2.0 — CAPA VISUAL MODERNA
+       Se conserva la estructura y toda la lógica original.
+       ========================================================= */
+    :root {
+      --primary: #5B5CE2;
+      --primary-hover: #4849C8;
+      --bg-body: #F5F6FC;
+      --bg-card: #FFFFFF;
+      --bg-sidebar: #171A35;
+      --text-main: #202342;
+      --text-muted: #777B98;
+      --text-sidebar: #C7C9DD;
+      --border-color: #E9EAF3;
+      --danger: #E45468;
+      --success: #18A77A;
+      --warning: #E9A23B;
+      --shadow-sm: 0 4px 16px rgba(31, 35, 80, .045);
+      --shadow-md: 0 12px 28px rgba(31, 35, 80, .09);
+      --shadow-lg: 0 24px 70px rgba(24, 27, 64, .22);
+      --radius: 18px;
+    }
+
+    body {
+      background:
+        radial-gradient(ellipse at 85% 0%, rgba(112, 113, 238, .08), transparent 34%),
+        var(--bg-body);
+      color: var(--text-main);
+      letter-spacing: -.01em;
+    }
+
+    .sidebar {
+      width: 272px;
+      padding: 27px 18px 20px;
+      background: linear-gradient(180deg, #1B1E3D 0%, #151832 100%);
+      box-shadow: 10px 0 35px rgba(20, 24, 57, .08);
+    }
+
+    .brand {
+      gap: 13px;
+      padding: 0 9px 27px;
+      margin-bottom: 25px;
+      border-bottom-color: rgba(255,255,255,.09);
+    }
+
+    .brand-icon {
+      width: 43px;
+      height: 43px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, #8586FF, #5556D9);
+      box-shadow: 0 8px 20px rgba(91,92,226,.35);
+      font-size: 20px;
+    }
+
+    .brand h1 { font-size: 18px; letter-spacing: 1.2px; }
+
+    .btn-nueva-nota {
+      min-height: 48px;
+      border-radius: 13px;
+      background: linear-gradient(115deg, #6869EF, #5556D9);
+      box-shadow: 0 9px 22px rgba(91,92,226,.27);
+      margin-bottom: 27px;
+      letter-spacing: .025em;
+    }
+
+    .nav-menu { gap: 7px; }
+    .nav-item {
+      min-height: 45px;
+      padding: 11px 13px;
+      border-radius: 11px;
+      color: #BFC2D9;
+      font-size: 13px;
+    }
+    .nav-item:hover { background: rgba(255,255,255,.075); }
+    .nav-item.active {
+      color: #FFF;
+      background: linear-gradient(100deg, rgba(105,106,239,.27), rgba(105,106,239,.12));
+      box-shadow: inset 3px 0 #8586FF;
+    }
+    .nav-item-left { gap: 12px; }
+    .badge-count { background: rgba(255,255,255,.12); }
+
+    .main-wrapper {
+      margin-left: 272px;
+      padding: 30px clamp(20px, 3.2vw, 52px) 42px;
+      max-width: 1700px;
+    }
+
+    .main-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 25px;
+    }
+    .main-topbar-copy { display: flex; flex-direction: column; gap: 5px; }
+    .main-eyebrow {
+      color: var(--primary);
+      text-transform: uppercase;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .15em;
+    }
+    .main-heading {
+      color: #202342;
+      font-size: clamp(23px, 2.3vw, 30px);
+      line-height: 1.2;
+      font-weight: 750;
+      letter-spacing: -.045em;
+    }
+    .main-subtitle { color: var(--text-muted); font-size: 13px; }
+    .topbar-date {
+      border: 1px solid #E9EAF3;
+      background: rgba(255,255,255,.82);
+      border-radius: 13px;
+      padding: 11px 15px;
+      color: #666B8C;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 25px;
+    }
+    .stat-card {
+      min-height: 106px;
+      padding: 18px;
+      border-radius: 16px;
+      border: 1px solid rgba(232,233,244,.9);
+      box-shadow: var(--shadow-sm);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+    .stat-info span { font-size: 10px; letter-spacing: .09em; color: #8589A4; }
+    .stat-info strong { font-size: 28px; letter-spacing: -.04em; color: #252747; }
+    .stat-icon { width: 43px; height: 43px; border-radius: 14px; font-size: 17px; }
+
+    .controls-panel {
+      padding: 19px;
+      border-radius: 17px;
+      border: 1px solid #E9EAF3;
+      box-shadow: var(--shadow-sm);
+      gap: 15px;
+    }
+    .search-box input {
+      min-height: 43px;
+      border-radius: 11px;
+      border-color: #E8E9F2;
+      background: #FAFAFD;
+      padding-left: 42px;
+    }
+    .search-box input:focus,
+    .filter-select:focus,
+    .filter-date:focus,
+    .form-control:focus {
+      border-color: #8586EF;
+      box-shadow: 0 0 0 3px rgba(91,92,226,.10);
+    }
+    .filter-select, .filter-date {
+      min-height: 40px;
+      border-radius: 10px;
+      border-color: #E8E9F2;
+      background: #FAFAFD;
+      color: #555A79;
+    }
+    .btn-clear-filters {
+      min-height: 40px;
+      border-radius: 10px;
+      border-color: #E8E9F2;
+      font-weight: 600;
+    }
+    .section-header { margin: 4px 0 17px; }
+    .section-title { font-size: 19px; letter-spacing: -.025em; }
+
+    .notes-grid {
+      grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+      gap: 17px;
+    }
+    .note-card {
+      min-height: 218px;
+      padding: 19px;
+      border: 1px solid #E9EAF3;
+      border-top-width: 4px;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(31,35,80,.045);
+    }
+    .note-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 30px rgba(31,35,80,.10);
+    }
+    .note-category-badge {
+      border-radius: 7px;
+      padding: 5px 10px;
+      font-size: 10px;
+      letter-spacing: .025em;
+    }
+    .icon-btn {
+      width: 29px;
+      height: 29px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    .note-title { font-size: 15px; line-height: 1.45; }
+    .note-preview { color: #777B98; line-height: 1.65; }
+    .tag-pill { background: #F1F1FC; color: #6566C7; border-radius: 7px; padding: 4px 8px; }
+    .note-footer { border-top-color: #EFF0F6; padding-top: 13px; }
+    .priority-badge, .status-badge { border-radius: 6px; padding: 4px 8px; }
+
+    .categories-panel {
+      border-radius: 17px;
+      border: 1px solid #E9EAF3;
+      box-shadow: var(--shadow-sm);
+    }
+    .cat-form input[type="text"] {
+      border-radius: 10px;
+      background: #FAFAFD;
+    }
+    .cat-form input[type="color"] { border-radius: 10px; }
+    .cat-item { border-radius: 11px; background: #FAFAFD; padding: 12px 14px; }
+
+    .modal-overlay { background: rgba(18,20,48,.58); backdrop-filter: blur(7px); }
+    .modal-box {
+      max-width: 720px;
+      border-radius: 20px;
+      box-shadow: 0 25px 80px rgba(15,18,48,.28);
+    }
+    .modal-header { padding: 21px 25px; }
+    .modal-header h2 { font-size: 19px; letter-spacing: -.025em; }
+    .modal-body { padding: 24px 25px; gap: 18px; }
+    .form-control {
+      min-height: 42px;
+      border-radius: 10px;
+      border-color: #E6E7F0;
+      background: #FCFCFE;
+    }
+    textarea.form-control { min-height: 165px; }
+    .modal-footer { padding: 16px 25px; background: #FAFAFD; }
+    .btn { border-radius: 10px; min-height: 41px; }
+    .btn-primary { background: linear-gradient(110deg, #6869EF, #5556D9); }
+    .btn-primary:hover { background: #4849C8; }
+    .btn-secondary { background: #F0F1F7; color: #555A79; }
+    .btn-danger { background: #E45468; }
+    .toast { border-radius: 12px; padding: 14px 18px; }
+    .empty-state {
+      background: rgba(255,255,255,.75);
+      border: 1px dashed #DADCEF;
+      border-radius: 17px;
+      padding: 65px 20px;
+    }
+    .loader-overlay { backdrop-filter: blur(5px); }
+
+    @media (max-width: 1150px) {
+      .stats-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    }
+    @media (max-width: 860px) {
+      .sidebar { width: 280px; box-shadow: 20px 0 55px rgba(10,12,35,.25); }
+      .main-wrapper { margin-left: 0; padding: 20px 16px 35px; }
+      .mobile-header {
+        display: flex;
+        background: #191C39;
+        padding: 13px 18px;
+        box-shadow: 0 5px 20px rgba(20,24,57,.12);
+      }
+      .main-topbar { align-items: flex-start; }
+      .topbar-date { display: none; }
+      .stats-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+      .stat-card { min-height: 92px; padding: 14px; }
+      .stat-info strong { font-size: 24px; }
+      .notes-grid { grid-template-columns: repeat(auto-fill, minmax(250px,1fr)); }
+      .controls-panel { padding: 14px; }
+      .search-box { min-width: 100%; }
+      .form-row-3, .form-row-2 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .main-heading { font-size: 23px; }
+      .main-subtitle { font-size: 12px; }
+      .stats-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .stat-icon { width: 35px; height: 35px; }
+      .notes-grid { grid-template-columns: 1fr; }
+      .filters-row > * { width: 100%; }
+      .modal-overlay { padding: 8px; }
+      .modal-box { max-height: 96vh; border-radius: 15px; }
+      .modal-header, .modal-body { padding-left: 17px; padding-right: 17px; }
+      .modal-footer { padding-left: 17px; padding-right: 17px; }
+      .meta-dates { flex-direction: column; gap: 7px; }
+      .toast-container { left: 12px; right: 12px; bottom: 12px; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- LOADER INICIAL -->
+  <div id="loader" class="loader-overlay">
+    <div class="spinner"></div>
+    <span>Cargando MIS NOTAS...</span>
+  </div>
+
+  <!-- HEADER MÓVIL -->
+  <header class="mobile-header">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div class="brand-icon" style="width:30px; height:30px; font-size:15px;">N</div>
+      <strong style="font-size:17px;">MIS NOTAS</strong>
+    </div>
+    <button class="btn-menu-toggle" onclick="toggleSidebar()">☰</button>
+  </header>
+
+  <!-- MENÚ LATERAL IZQUIERDO -->
+  <aside id="sidebar" class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">N</div>
+      <h1>MIS NOTAS</h1>
+    </div>
+
+    <button class="btn-nueva-nota" onclick="abrirModalNota()">
+      <span>+</span> NUEVA NOTA
+    </button>
+
+    <ul class="nav-menu">
+      <li class="nav-item active" data-vista="todas" onclick="cambiarVista('todas', this)">
+        <div class="nav-item-left"><span>📋</span> Todas las notas</div>
+        <span class="badge-count" id="nav-count-todas">0</span>
+      </li>
+      <li class="nav-item" onclick="abrirModalNota()">
+        <div class="nav-item-left"><span>✏️</span> Crear nota</div>
+      </li>
+      <li class="nav-item" data-vista="favoritas" onclick="cambiarVista('favoritas', this)">
+        <div class="nav-item-left"><span>⭐</span> Favoritas</div>
+        <span class="badge-count" id="nav-count-favoritas">0</span>
+      </li>
+      <li class="nav-item" data-vista="pendientes" onclick="cambiarVista('pendientes', this)">
+        <div class="nav-item-left"><span>⏳</span> Pendientes</div>
+        <span class="badge-count" id="nav-count-pendientes">0</span>
+      </li>
+      <li class="nav-item" data-vista="finalizadas" onclick="cambiarVista('finalizadas', this)">
+        <div class="nav-item-left"><span>✅</span> Notas finalizadas</div>
+        <span class="badge-count" id="nav-count-finalizadas">0</span>
+      </li>
+      <li class="nav-item" data-vista="archivadas" onclick="cambiarVista('archivadas', this)">
+        <div class="nav-item-left"><span>📦</span> Archivadas</div>
+        <span class="badge-count" id="nav-count-archivadas">0</span>
+      </li>
+      <li class="nav-item" data-vista="categorias" onclick="cambiarVista('categorias', this)">
+        <div class="nav-item-left"><span>🏷️</span> Categorías</div>
+      </li>
+    </ul>
+
+    <div style="padding:16px 10px 2px; border-top:1px solid rgba(255,255,255,.09); color:#8589AA; font-size:10px; line-height:1.6;">
+      <strong style="display:block; color:#C7C9DD; font-size:11px; letter-spacing:.08em;">MIS NOTAS</strong>
+      Agenda digital · Organiza tu día
+    </div>
+  </aside>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="main-wrapper">
+
+    <!-- ENCABEZADO PRINCIPAL -->
+    <header class="main-topbar">
+      <div class="main-topbar-copy">
+        <span class="main-eyebrow">Tu espacio personal</span>
+        <h2 class="main-heading">Organiza tus ideas, sin perder ninguna.</h2>
+        <p class="main-subtitle">Administra tus notas, tareas y proyectos desde un solo lugar.</p>
+      </div>
+      <div class="topbar-date" id="fecha-actual">MIS NOTAS · Agenda digital</div>
+    </header>
+
+    <!-- PANEL DE CONTROL (ESTADÍSTICAS) -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-info">
+          <span>Total de notas</span>
+          <strong id="stat-total">0</strong>
+        </div>
+        <div class="stat-icon" style="background:#EFF6FF; color:#2563EB;">📄</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-info">
+          <span>Pendientes</span>
+          <strong id="stat-pendientes">0</strong>
+        </div>
+        <div class="stat-icon" style="background:#FEF3C7; color:#D97706;">⏳</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-info">
+          <span>Finalizadas</span>
+          <strong id="stat-finalizadas">0</strong>
+        </div>
+        <div class="stat-icon" style="background:#DCFCE7; color:#16A34A;">✅</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-info">
+          <span>Favoritas</span>
+          <strong id="stat-favoritas">0</strong>
+        </div>
+        <div class="stat-icon" style="background:#FEF9C3; color:#CA8A04;">⭐</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-info">
+          <span>Archivadas</span>
+          <strong id="stat-archivadas">0</strong>
+        </div>
+        <div class="stat-icon" style="background:#F1F5F9; color:#475569;">📦</div>
+      </div>
+    </section>
+
+    <!-- VISTA DE NOTAS -->
+    <div id="vista-notas-container">
+      <!-- BARRA DE BÚSQUEDA Y FILTROS -->
+      <section class="controls-panel">
+        <div class="search-row">
+          <div class="search-box">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input type="text" id="input-busqueda" placeholder="Buscar por título, contenido o etiquetas..." oninput="renderizarNotas()">
+          </div>
+          <select id="ordenar-por" class="filter-select" onchange="renderizarNotas()">
+            <option value="modificacion_desc">Ordenar: Más recientes (Modificación)</option>
+            <option value="creacion_desc">Ordenar: Fecha de creación (Nuevas)</option>
+            <option value="creacion_asc">Ordenar: Fecha de creación (Antiguas)</option>
+          </select>
+        </div>
+
+        <div class="filters-row">
+          <select id="filtro-categoria" class="filter-select" onchange="renderizarNotas()">
+            <option value="">Todas las categorías</option>
+          </select>
+
+          <select id="filtro-prioridad" class="filter-select" onchange="renderizarNotas()">
+            <option value="">Todas las prioridades</option>
+            <option value="Alta">Prioridad: Alta</option>
+            <option value="Media">Prioridad: Media</option>
+            <option value="Baja">Prioridad: Baja</option>
+          </select>
+
+          <select id="filtro-estado" class="filter-select" onchange="renderizarNotas()">
+            <option value="">Todos los estados</option>
+            <option value="Pendiente">Estado: Pendiente</option>
+            <option value="En proceso">Estado: En proceso</option>
+            <option value="Finalizada">Estado: Finalizada</option>
+          </select>
+
+          <input type="date" id="filtro-fecha" class="filter-date" title="Filtrar por fecha de creación" onchange="renderizarNotas()">
+
+          <button class="btn-clear-filters" onclick="limpiarFiltros()">Limpiar filtros</button>
+        </div>
+      </section>
+
+      <div class="section-header">
+        <h2 class="section-title" id="titulo-seccion">Todas las notas</h2>
+      </div>
+
+      <!-- CUADRÍCULA DE TARJETAS -->
+      <section id="notes-grid" class="notes-grid"></section>
+    </div>
+
+    <!-- VISTA DE ADMINISTRACIÓN DE CATEGORÍAS -->
+    <div id="vista-categorias-container" style="display:none;">
+      <div class="section-header">
+        <h2 class="section-title">Administrar Categorías</h2>
+      </div>
+      <div class="categories-panel">
+        <form class="cat-form" onsubmit="crearNuevaCategoria(event)">
+          <input type="text" id="nueva-cat-nombre" placeholder="Nombre de la nueva categoría..." required>
+          <input type="color" id="nueva-cat-color" value="#2563EB" title="Seleccionar color de etiqueta">
+          <button type="submit" class="btn btn-primary">Agregar Categoría</button>
+        </form>
+        <div id="lista-categorias-admin" class="cat-list"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL CREAR / EDITAR NOTA -->
+  <div id="modal-nota" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h2 id="modal-nota-titulo">Nueva Nota</h2>
+          <span id="nota-id-display" style="font-size:11px; color:var(--text-muted);"></span>
+        </div>
+        <span id="autosave-status" class="autosave-indicator"></span>
+      </div>
+
+      <form id="form-nota" class="modal-body" onsubmit="guardarNotaFormulario(event)">
+        <input type="hidden" id="nota-id">
+
+        <div class="form-group">
+          <label for="nota-titulo">Título de la nota *</label>
+          <input type="text" id="nota-titulo" class="form-control" placeholder="Ej: Resumen de reunión semanal" required oninput="programarAutoguardado()">
+        </div>
+
+        <div class="form-group">
+          <label for="nota-contenido">Descripción o contenido *</label>
+          <textarea id="nota-contenido" class="form-control" placeholder="Escribe aquí los detalles, ideas o tareas..." required oninput="programarAutoguardado()"></textarea>
+        </div>
+
+        <div class="form-row-3">
+          <div class="form-group">
+            <label for="nota-categoria">Categoría</label>
+            <select id="nota-categoria" class="form-control" onchange="programarAutoguardado()"></select>
+          </div>
+
+          <div class="form-group">
+            <label for="nota-prioridad">Prioridad</label>
+            <select id="nota-prioridad" class="form-control" onchange="programarAutoguardado()">
+              <option value="Alta">Alta</option>
+              <option value="Media" selected>Media</option>
+              <option value="Baja">Baja</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="nota-estado">Estado</label>
+            <select id="nota-estado" class="form-control" onchange="programarAutoguardado()">
+              <option value="Pendiente" selected>Pendiente</option>
+              <option value="En proceso">En proceso</option>
+              <option value="Finalizada">Finalizada</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="nota-etiquetas">Etiquetas (separadas por comas)</label>
+            <input type="text" id="nota-etiquetas" class="form-control" placeholder="ej: urgente, finanzas, proyecto" oninput="programarAutoguardado()">
+          </div>
+
+          <div class="form-group" style="justify-content:center; padding-top:18px;">
+            <label class="checkbox-label">
+              <input type="checkbox" id="nota-favorita" onchange="programarAutoguardado()">
+              ⭐ Marcar como nota favorita
+            </label>
+          </div>
+        </div>
+
+        <div id="nota-fechas-info" class="meta-dates" style="display:none;">
+          <span id="info-fecha-creacion"></span>
+          <span id="info-fecha-modificacion"></span>
+        </div>
+
+        <div class="modal-footer" style="padding:16px 0 0; background:none; border:none;">
+          <button type="button" class="btn btn-secondary" onclick="cerrarModalNota()">Cerrar</button>
+          <button type="submit" id="btn-guardar-nota" class="btn btn-primary">Guardar Nota</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIRMACIÓN ELIMINAR -->
+  <div id="modal-confirmar" class="modal-overlay">
+    <div class="modal-box" style="max-width:420px;">
+      <div class="modal-header">
+        <h2>Confirmar eliminación</h2>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:14px; color:var(--text-muted); line-height:1.5;">
+          ¿Estás seguro de que deseas eliminar esta nota permanentemente? Esta acción no se puede deshacer.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="cerrarModalConfirmar()">Cancelar</button>
+        <button id="btn-confirmar-eliminar" class="btn btn-danger">Eliminar definitivamente</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR NOTIFICACIONES -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script>
+    // ESTADO GLOBAL DE LA APLICACIÓN
+    let estadoApp = {
+      notas: [],
+      categorias: [],
+      vistaActual: 'todas',
+      notaAEliminarId: null,
+      timerAutoguardado: null,
+      guardandoEnCurso: false
+    };
+
+    // INICIALIZACIÓN
+    document.addEventListener('DOMContentLoaded', () => {
+      const fechaActual = document.getElementById('fecha-actual');
+      if (fechaActual) {
+        fechaActual.textContent = new Date().toLocaleDateString('es-CO', {
+          weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+        });
+      }
+      cargarDatosServidor();
+    });
+
+    function cargarDatosServidor() {
+      google.script.run
+        .withSuccessHandler((res) => {
+          document.getElementById('loader').style.display = 'none';
+          if (res.exito) {
+            estadoApp.notas = res.notas || [];
+            estadoApp.categorias = res.categorias || [];
+            actualizarSelectoresCategorias();
+            actualizarEstadisticas();
+            renderizarNotas();
+            renderizarListaCategoriasAdmin();
+          } else {
+            mostrarToast(res.mensaje || 'Error al cargar datos.', 'error');
+          }
+        })
+        .withFailureHandler((err) => {
+          document.getElementById('loader').style.display = 'none';
+          mostrarToast('Error de conexión: ' + err.message, 'error');
+        })
+        .obtenerDatosIniciales();
+    }
+
+    // NAVEGACIÓN Y MENÚ
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    function cambiarVista(vista, elemento) {
+      estadoApp.vistaActual = vista;
+
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      if (elemento) elemento.classList.add('active');
+
+      // Cerrar menú en móvil tras seleccionar
+      document.getElementById('sidebar').classList.remove('open');
+
+      const vistaNotas = document.getElementById('vista-notas-container');
+      const vistaCategorias = document.getElementById('vista-categorias-container');
+
+      if (vista === 'categorias') {
+        vistaNotas.style.display = 'none';
+        vistaCategorias.style.display = 'block';
+        renderizarListaCategoriasAdmin();
+      } else {
+        vistaNotas.style.display = 'block';
+        vistaCategorias.style.display = 'none';
+
+        const titulos = {
+          todas: 'Todas las notas',
+          favoritas: 'Notas favoritas',
+          pendientes: 'Notas pendientes',
+          finalizadas: 'Notas finalizadas',
+          archivadas: 'Notas archivadas'
+        };
+        document.getElementById('titulo-seccion').textContent = titulos[vista] || 'Notas';
+        renderizarNotas();
+      }
+    }
+
+    // ACTUALIZAR ESTADÍSTICAS Y CONTADORES
+    function actualizarEstadisticas() {
+      const activas = estadoApp.notas.filter(n => !n.archivada);
+      const total = activas.length;
+      const pendientes = activas.filter(n => n.estado === 'Pendiente').length;
+      const finalizadas = activas.filter(n => n.estado === 'Finalizada').length;
+      const favoritas = activas.filter(n => n.favorita).length;
+      const archivadas = estadoApp.notas.filter(n => n.archivada).length;
+
+      document.getElementById('stat-total').textContent = total;
+      document.getElementById('stat-pendientes').textContent = pendientes;
+      document.getElementById('stat-finalizadas').textContent = finalizadas;
+      document.getElementById('stat-favoritas').textContent = favoritas;
+      document.getElementById('stat-archivadas').textContent = archivadas;
+
+      document.getElementById('nav-count-todas').textContent = total;
+      document.getElementById('nav-count-favoritas').textContent = favoritas;
+      document.getElementById('nav-count-pendientes').textContent = pendientes;
+      document.getElementById('nav-count-finalizadas').textContent = finalizadas;
+      document.getElementById('nav-count-archivadas').textContent = archivadas;
+    }
+
+    // OBTENER COLOR DE CATEGORÍA
+    function obtenerColorCategoria(nombreCat) {
+      const cat = estadoApp.categorias.find(c => c.nombre.toLowerCase() === String(nombreCat).toLowerCase());
+      return cat ? cat.color : '#64748B';
+    }
+
+    // RENDERIZAR TARJETAS DE NOTAS CON FILTROS Y ORDENAMIENTO
+    function renderizarNotas() {
+      const grid = document.getElementById('notes-grid');
+      const textoBusqueda = document.getElementById('input-busqueda').value.toLowerCase().trim();
+      const catFiltro = document.getElementById('filtro-categoria').value;
+      const prioFiltro = document.getElementById('filtro-prioridad').value;
+      const estFiltro = document.getElementById('filtro-estado').value;
+      const fechaFiltro = document.getElementById('filtro-fecha').value;
+      const orden = document.getElementById('ordenar-por').value;
+
+      let filtradas = estadoApp.notas.filter(nota => {
+        // Filtro por sección del menú
+        if (estadoApp.vistaActual === 'archivadas') {
+          if (!nota.archivada) return false;
+        } else {
+          if (nota.archivada) return false;
+          if (estadoApp.vistaActual === 'favoritas' && !nota.favorita) return false;
+          if (estadoApp.vistaActual === 'pendientes' && nota.estado !== 'Pendiente') return false;
+          if (estadoApp.vistaActual === 'finalizadas' && nota.estado !== 'Finalizada') return false;
+        }
+
+        // Búsqueda por título, contenido o etiquetas
+        if (textoBusqueda) {
+          const coincide =
+            nota.titulo.toLowerCase().includes(textoBusqueda) ||
+            nota.contenido.toLowerCase().includes(textoBusqueda) ||
+            nota.etiquetas.toLowerCase().includes(textoBusqueda);
+          if (!coincide) return false;
+        }
+
+        // Filtros desplegables
+        if (catFiltro && nota.categoria !== catFiltro) return false;
+        if (prioFiltro && nota.prioridad !== prioFiltro) return false;
+        if (estFiltro && nota.estado !== estFiltro) return false;
+
+        // Filtro por fecha exacta (YYYY-MM-DD)
+        if (fechaFiltro) {
+          const fechaNota = new Date(nota.fechaCreacion).toISOString().split('T')[0];
+          if (fechaNota !== fechaFiltro) return false;
+        }
+
+        return true;
+      });
+
+      // Ordenamiento
+      filtradas.sort((a, b) => {
+        if (orden === 'modificacion_desc') {
+          return new Date(b.fechaModificacion) - new Date(a.fechaModificacion);
+        } else if (orden === 'creacion_desc') {
+          return new Date(b.fechaCreacion) - new Date(a.fechaCreacion);
+        } else {
+          return new Date(a.fechaCreacion) - new Date(b.fechaCreacion);
+        }
+      });
+
+      if (filtradas.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div style="font-size:42px; margin-bottom:10px;">🗂️</div>
+            <h3>No se encontraron notas</h3>
+            <p style="font-size:13px; margin-top:4px;">Prueba cambiando los filtros o crea una nueva nota.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtradas.map(nota => {
+        const colorCat = obtenerColorCategoria(nota.categoria);
+        const fechaFormateada = formatearFechaLegible(nota.fechaModificacion);
+        const etiquetasHTML = nota.etiquetas
+          ? nota.etiquetas.split(',').map(t => t.trim()).filter(Boolean)
+              .map(t => `<span class="tag-pill">#${escaparHTML(t)}</span>`).join('')
+          : '';
+
+        const claseEstado = 'status-' + nota.estado.replace(/\s+/g, '-');
+
+        return `
+          <article class="note-card" style="border-top-color: ${colorCat};">
+            <div>
+              <div class="note-card-header">
+                <span class="note-category-badge" style="background-color: ${colorCat};">
+                  ${escaparHTML(nota.categoria)}
+                </span>
+                <div class="note-actions-top">
+                  <button class="icon-btn ${nota.favorita ? 'fav-active' : ''}"
+                          title="${nota.favorita ? 'Quitar de favoritas' : 'Marcar favorita'}"
+                          onclick="toggleFavorita('${nota.id}')">
+                    ${nota.favorita ? '★' : '☆'}
+                  </button>
+                  <button class="icon-btn" title="Editar nota" onclick="editarNota('${nota.id}')">
+                    ✏️
+                  </button>
+                  <button class="icon-btn"
+                          title="${nota.archivada ? 'Restaurar nota' : 'Archivar nota'}"
+                          onclick="toggleArchivada('${nota.id}')">
+                    ${nota.archivada ? '📤' : '📥'}
+                  </button>
+                  <button class="icon-btn delete-btn" title="Eliminar nota" onclick="solicitarEliminar('${nota.id}')">
+                    🗑️
+                  </button>
+                </div>
+              </div>
+
+              <h3 class="note-title" onclick="editarNota('${nota.id}')">${escaparHTML(nota.titulo)}</h3>
+              <p class="note-preview">${escaparHTML(nota.contenido)}</p>
+              ${etiquetasHTML ? `<div class="note-tags">${etiquetasHTML}</div>` : ''}
+            </div>
+
+            <div class="note-footer">
+              <div class="badges-group">
+                <span class="priority-badge prio-${nota.prioridad}">${nota.prioridad}</span>
+                <span class="status-badge ${claseEstado}">${nota.estado}</span>
+              </div>
+              <span title="Última modificación">${fechaFormateada}</span>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function limpiarFiltros() {
+      document.getElementById('input-busqueda').value = '';
+      document.getElementById('filtro-categoria').value = '';
+      document.getElementById('filtro-prioridad').value = '';
+      document.getElementById('filtro-estado').value = '';
+      document.getElementById('filtro-fecha').value = '';
+      renderizarNotas();
+    }
+
+    // MODAL CREAR / EDITAR NOTA
+    function abrirModalNota(nota = null) {
+      clearTimeout(estadoApp.timerAutoguardado);
+      document.getElementById('autosave-status').textContent = '';
+      const modal = document.getElementById('modal-nota');
+      const fechasDiv = document.getElementById('nota-fechas-info');
+
+      if (nota) {
+        document.getElementById('modal-nota-titulo').textContent = 'Editar Nota';
+        document.getElementById('nota-id-display').textContent = 'ID: ' + nota.id;
+        document.getElementById('nota-id').value = nota.id;
+        document.getElementById('nota-titulo').value = nota.titulo;
+        document.getElementById('nota-contenido').value = nota.contenido;
+        document.getElementById('nota-categoria').value = nota.categoria;
+        document.getElementById('nota-prioridad').value = nota.prioridad;
+        document.getElementById('nota-estado').value = nota.estado;
+        document.getElementById('nota-etiquetas').value = nota.etiquetas;
+        document.getElementById('nota-favorita').checked = nota.favorita;
+
+        fechasDiv.style.display = 'flex';
+        document.getElementById('info-fecha-creacion').textContent = 'Creada: ' + formatearFechaLegible(nota.fechaCreacion, true);
+        document.getElementById('info-fecha-modificacion').textContent = 'Modificada: ' + formatearFechaLegible(nota.fechaModificacion, true);
+      } else {
+        document.getElementById('modal-nota-titulo').textContent = 'Nueva Nota';
+        document.getElementById('nota-id-display').textContent = 'ID generado automáticamente al guardar';
+        document.getElementById('form-nota').reset();
+        document.getElementById('nota-id').value = '';
+        fechasDiv.style.display = 'none';
+      }
+
+      modal.classList.add('open');
+    }
+
+    function cerrarModalNota() {
+      clearTimeout(estadoApp.timerAutoguardado);
+      document.getElementById('modal-nota').classList.remove('open');
+    }
+
+    function editarNota(id) {
+      const nota = estadoApp.notas.find(n => n.id === id);
+      if (nota) abrirModalNota(nota);
+    }
+
+    // AUTOGUARDADO AL EDITAR NOTAS EXISTENTES
+    function programarAutoguardado() {
+      const idActual = document.getElementById('nota-id').value;
+      const titulo = document.getElementById('nota-titulo').value.trim();
+      const contenido = document.getElementById('nota-contenido').value.trim();
+
+      // Solo autoguardar si la nota ya existe y tiene campos obligatorios válidos
+      if (!idActual || !titulo || !contenido) return;
+
+      document.getElementById('autosave-status').textContent = 'Escribiendo...';
+      clearTimeout(estadoApp.timerAutoguardado);
+
+      estadoApp.timerAutoguardado = setTimeout(() => {
+        ejecutarGuardado(true);
+      }, 1800);
+    }
+
+    function guardarNotaFormulario(event) {
+      event.preventDefault();
+      clearTimeout(estadoApp.timerAutoguardado);
+      ejecutarGuardado(false);
+    }
+
+    function ejecutarGuardado(esAutoguardado) {
+      if (estadoApp.guardandoEnCurso) return;
+
+      const id = document.getElementById('nota-id').value;
+      const notaExistente = id ? estadoApp.notas.find(n => n.id === id) : null;
+
+      const payload = {
+        id: id || null,
+        titulo: document.getElementById('nota-titulo').value,
+        contenido: document.getElementById('nota-contenido').value,
+        categoria: document.getElementById('nota-categoria').value,
+        prioridad: document.getElementById('nota-prioridad').value,
+        estado: document.getElementById('nota-estado').value,
+        etiquetas: document.getElementById('nota-etiquetas').value,
+        favorita: document.getElementById('nota-favorita').checked,
+        archivada: notaExistente ? notaExistente.archivada : false
+      };
+
+      const btnGuardar = document.getElementById('btn-guardar-nota');
+      const statusSpan = document.getElementById('autosave-status');
+
+      estadoApp.guardandoEnCurso = true;
+      if (esAutoguardado) {
+        statusSpan.textContent = 'Guardando cambios automáticamente...';
+      } else {
+        btnGuardar.disabled = true;
+        btnGuardar.textContent = 'Guardando...';
+      }
+
+      google.script.run
+        .withSuccessHandler((res) => {
+          estadoApp.guardandoEnCurso = false;
+          btnGuardar.disabled = false;
+          btnGuardar.textContent = 'Guardar Nota';
+
+          if (res.exito) {
+            const idx = estadoApp.notas.findIndex(n => n.id === res.nota.id);
+            if (idx !== -1) {
+              estadoApp.notas[idx] = res.nota;
+            } else {
+              estadoApp.notas.unshift(res.nota);
+            }
+
+            actualizarEstadisticas();
+            renderizarNotas();
+
+            if (esAutoguardado) {
+              statusSpan.textContent = '✓ Guardado automáticamente';
+              document.getElementById('info-fecha-modificacion').textContent =
+                'Modificada: ' + formatearFechaLegible(res.nota.fechaModificacion, true);
+            } else {
+              mostrarToast(res.mensaje, 'success');
+              cerrarModalNota();
+            }
+          } else {
+            statusSpan.textContent = '';
+            mostrarToast(res.mensaje, 'error');
+          }
+        })
+        .withFailureHandler((err) => {
+          estadoApp.guardandoEnCurso = false;
+          btnGuardar.disabled = false;
+          btnGuardar.textContent = 'Guardar Nota';
+          statusSpan.textContent = 'Error al autoguardar';
+          mostrarToast('Error: ' + err.message, 'error');
+        })
+        .guardarNota(payload);
+    }
+
+    // ACCIONES RÁPIDAS EN TARJETAS
+    function toggleFavorita(id) {
+      const nota = estadoApp.notas.find(n => n.id === id);
+      if (!nota) return;
+
+      const nuevoValor = !nota.favorita;
+      nota.favorita = nuevoValor;
+      actualizarEstadisticas();
+      renderizarNotas();
+
+      google.script.run
+        .withSuccessHandler((res) => {
+          if (res.exito) {
+            nota.fechaModificacion = res.fechaModificacion;
+            mostrarToast(nuevoValor ? 'Añadida a favoritas' : 'Quitada de favoritas', 'success');
+          }
+        })
+        .actualizarEstadoRapido(id, 'favorita', nuevoValor);
+    }
+
+    function toggleArchivada(id) {
+      const nota = estadoApp.notas.find(n => n.id === id);
+      if (!nota) return;
+
+      const nuevoValor = !nota.archivada;
+      nota.archivada = nuevoValor;
+      actualizarEstadisticas();
+      renderizarNotas();
+
+      google.script.run
+        .withSuccessHandler((res) => {
+          if (res.exito) {
+            nota.fechaModificacion = res.fechaModificacion;
+            mostrarToast(nuevoValor ? 'Nota archivada' : 'Nota recuperada del archivo', 'success');
+          }
+        })
+        .actualizarEstadoRapido(id, 'archivada', nuevoValor);
+    }
+
+    // ELIMINACIÓN CON CONFIRMACIÓN
+    function solicitarEliminar(id) {
+      estadoApp.notaAEliminarId = id;
+      document.getElementById('modal-confirmar').classList.add('open');
+      document.getElementById('btn-confirmar-eliminar').onclick = confirmarEliminacion;
+    }
+
+    function cerrarModalConfirmar() {
+      estadoApp.notaAEliminarId = null;
+      document.getElementById('modal-confirmar').classList.remove('open');
+    }
+
+    function confirmarEliminacion() {
+      const id = estadoApp.notaAEliminarId;
+      if (!id) return;
+
+      const btn = document.getElementById('btn-confirmar-eliminar');
+      btn.disabled = true;
+      btn.textContent = 'Eliminando...';
+
+      google.script.run
+        .withSuccessHandler((res) => {
+          btn.disabled = false;
+          btn.textContent = 'Eliminar definitivamente';
+          cerrarModalConfirmar();
+
+          if (res.exito) {
+            estadoApp.notas = estadoApp.notas.filter(n => n.id !== id);
+            actualizarEstadisticas();
+            renderizarNotas();
+            mostrarToast(res.mensaje, 'success');
+          } else {
+            mostrarToast(res.mensaje, 'error');
+          }
+        })
+        .withFailureHandler((err) => {
+          btn.disabled = false;
+          btn.textContent = 'Eliminar definitivamente';
+          mostrarToast('Error al eliminar: ' + err.message, 'error');
+        })
+        .eliminarNota(id);
+    }
+
+    // GESTIÓN DE CATEGORÍAS
+    function actualizarSelectoresCategorias() {
+      const selectFiltro = document.getElementById('filtro-categoria');
+      const selectForm = document.getElementById('nota-categoria');
+
+      selectFiltro.innerHTML = '<option value="">Todas las categorías</option>';
+      selectForm.innerHTML = '';
+
+      estadoApp.categorias.forEach(cat => {
+        selectFiltro.innerHTML += `<option value="${escaparHTML(cat.nombre)}">${escaparHTML(cat.nombre)}</option>`;
+        selectForm.innerHTML += `<option value="${escaparHTML(cat.nombre)}">${escaparHTML(cat.nombre)}</option>`;
+      });
+    }
+
+    function renderizarListaCategoriasAdmin() {
+      const contenedor = document.getElementById('lista-categorias-admin');
+      contenedor.innerHTML = estadoApp.categorias.map(cat => `
+        <div class="cat-item">
+          <div class="cat-item-info">
+            <span class="color-dot" style="background-color:${cat.color};"></span>
+            <span>${escaparHTML(cat.nombre)}</span>
+          </div>
+          ${cat.nombre.toLowerCase() !== 'otros'
+            ? `<button class="icon-btn delete-btn" title="Eliminar categoría" onclick="borrarCategoria('${escaparHTML(cat.nombre)}')">✕</button>`
+            : '<span style="font-size:11px; color:var(--text-muted);">Base</span>'
+          }
+        </div>
+      `).join('');
+    }
+
+    function crearNuevaCategoria(event) {
+      event.preventDefault();
+      const inputNombre = document.getElementById('nueva-cat-nombre');
+      const inputColor = document.getElementById('nueva-cat-color');
+      const nombre = inputNombre.value.trim();
+      const color = inputColor.value;
+
+      if (!nombre) return;
+
+      google.script.run
+        .withSuccessHandler((res) => {
+          if (res.exito) {
+            estadoApp.categorias = res.categorias;
+            inputNombre.value = '';
+            actualizarSelectoresCategorias();
+            renderizarListaCategoriasAdmin();
+            renderizarNotas();
+            mostrarToast(res.mensaje, 'success');
+          } else {
+            mostrarToast(res.mensaje, 'error');
+          }
+        })
+        .agregarCategoria(nombre, color);
+    }
+
+    function borrarCategoria(nombre) {
+      google.script.run
+        .withSuccessHandler((res) => {
+          if (res.exito) {
+            estadoApp.categorias = res.categorias;
+            actualizarSelectoresCategorias();
+            renderizarListaCategoriasAdmin();
+            mostrarToast(res.mensaje, 'success');
+          } else {
+            mostrarToast(res.mensaje, 'error');
+          }
+        })
+        .eliminarCategoria(nombre);
+    }
+
+    // UTILIDADES
+    function formatearFechaLegible(isoString, incluirHora = false) {
+      if (!isoString) return '';
+      const fecha = new Date(isoString);
+      const opciones = { day: '2-digit', month: 'short', year: 'numeric' };
+      if (incluirHora) {
+        opciones.hour = '2-digit';
+        opciones.minute = '2-digit';
+      }
+      return fecha.toLocaleDateString('es-ES', opciones);
+    }
+
+    function escaparHTML(texto) {
+      if (!texto) return '';
+      return String(texto)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function mostrarToast(mensaje, tipo = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${tipo}`;
+      toast.innerHTML = `<span>${tipo === 'success' ? '✓' : '⚠️'}</span><span>${escaparHTML(mensaje)}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+  </script>
+</body>
+</html>
