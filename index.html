@@ -2,53 +2,117 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MIS NOTAS | Agenda Digital</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; display: flex; height: 100vh; background-color: #f8f9fa; }
-        .sidebar { width: 260px; background: #2c3e50; color: white; padding: 20px; display: flex; flex-direction: column; }
-        .sidebar h2 { margin-top: 0; font-size: 1.5rem; }
-        .sidebar a { color: #ecf0f1; text-decoration: none; padding: 12px 0; display: block; cursor: pointer; transition: 0.3s; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; display: flex; height: 100vh; background-color: #f8f9fa; overflow-x: hidden; }
+        
+        /* Sidebar */
+        .sidebar { width: 260px; background: #2c3e50; color: white; padding: 20px; display: flex; flex-direction: column; flex-shrink: 0; transition: transform 0.3s ease; }
+        .sidebar h2 { margin-top: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
+        .sidebar a { color: #ecf0f1; text-decoration: none; padding: 14px 0; display: block; cursor: pointer; transition: 0.3s; font-size: 1rem; border-bottom: 1px solid #34495e; }
+        .sidebar a:last-child { border-bottom: none; }
         .sidebar a:hover { color: #3498db; padding-left: 5px; }
-        .main { flex: 1; padding: 30px; overflow-y: auto; }
+        
+        /* Main Content */
+        .main { flex: 1; padding: 30px; overflow-y: auto; position: relative; }
+        .menu-toggle { display: none; background: #2c3e50; color: white; border: none; padding: 10px 15px; border-radius: 6px; font-size: 1rem; cursor: pointer; margin-bottom: 15px; align-items: center; gap: 8px; }
+        
+        /* Stats */
         .stats { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
-        .stat-box { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); flex: 1; min-width: 130px; text-align: center; font-weight: bold; }
+        .stat-box { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); flex: 1; min-width: 130px; text-align: center; font-weight: bold; font-size: 0.95rem; }
+        
+        /* Filters */
         .filters { margin-bottom: 25px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-        .filters select, .filters button { padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd; background: white; cursor: pointer; }
+        .filters select, .filters button { padding: 10px 12px; border-radius: 6px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 14px; }
+        
+        /* Notes Grid */
         .notes-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .note-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 4px solid #3498db; }
-        .note-card h3 { margin-top: 0; color: #2c3e50; }
+        .note-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 4px solid #3498db; word-wrap: break-word; }
+        .note-card h3 { margin-top: 0; color: #2c3e50; font-size: 1.1rem; }
         .note-actions { margin-top: 15px; display: flex; gap: 10px; }
         
         /* Modales */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 25px; border-radius: 10px; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
+        .modal-content { background: white; padding: 25px; border-radius: 10px; width: 100%; max-width: 500px; box-shadow: 0 5px 25px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
         .modal-content form { display: flex; flex-direction: column; gap: 12px; }
-        .modal-content input, .modal-content textarea, .modal-content select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        .modal-content label { font-weight: 600; font-size: 0.9rem; color: #34495e; }
+        /* Font-size 16px previene el zoom automático en iOS al hacer focus */
+        .modal-content input, .modal-content textarea, .modal-content select { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; width: 100%; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; }
-        .btn-primary { background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-danger { background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-secondary { background: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
-        .btn-primary:hover { background: #2980b9; }
-        .btn-danger:hover { background: #c0392b; }
+        
+        /* Botones */
+        .btn-primary { background: #3498db; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; }
+        .btn-danger { background: #e74c3c; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; }
+        .btn-secondary { background: #95a5a6; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+        .btn-primary:active { background: #2980b9; }
+        .btn-danger:active { background: #c0392b; }
+
+        /* Overlay para móvil cuando el menú está abierto */
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+
+        /* =========================================
+           MEDIA QUERIES PARA DISPOSITIVOS MÓVILES
+           ========================================= */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            
+            .menu-toggle { display: flex; }
+            
+            .sidebar { 
+                position: fixed; 
+                left: -280px; 
+                top: 0; 
+                height: 100%; 
+                z-index: 1001; 
+                width: 280px;
+                box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+            }
+            .sidebar.active { left: 0; }
+            .sidebar-overlay.active { display: block; }
+            
+            .main { padding: 15px; }
+            .main h1 { font-size: 1.5rem; }
+            
+            /* Estadísticas en 2 columnas en móvil */
+            .stats { gap: 10px; }
+            .stat-box { min-width: calc(50% - 5px); padding: 12px 8px; font-size: 0.85rem; }
+            
+            /* Filtros apilados verticalmente para mejor toque */
+            .filters { flex-direction: column; align-items: stretch; gap: 10px; }
+            .filters select, .filters button { width: 100%; padding: 12px; }
+            
+            /* Tarjetas de notas más compactas */
+            .notes-list { grid-template-columns: 1fr; gap: 15px; }
+            .note-card { padding: 15px; }
+            .note-actions { flex-direction: column; }
+            .note-actions button { width: 100%; }
+            
+            .modal-content { padding: 20px; }
+        }
     </style>
 </head>
 <body>
-    <div class="sidebar">
+    <!-- Overlay para cerrar el menú al hacer clic fuera en móvil -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
         <h2>📝 MIS NOTAS</h2>
-        <a id="openModalBtn">+ NUEVA NOTA</a>
-        <a onclick="filterNotes('all')">📋 Todas las notas</a>
-        <a onclick="filterNotes('favorite')">⭐ Favoritas</a>
-        <a onclick="filterNotes('pending')">⏳ Pendientes</a>
-        <a onclick="filterNotes('finished')">✅ Notas finalizadas</a>
-        <a onclick="filterNotes('archived')">📦 Archivadas</a>
-        <hr style="border-color: #34495e; width: 100%;">
-        <a>🏷️ Categorías</a>
+        <a id="openModalBtn" onclick="toggleSidebar()">+ NUEVA NOTA</a>
+        <a onclick="filterNotes('all'); toggleSidebar()">📋 Todas las notas</a>
+        <a onclick="filterNotes('favorite'); toggleSidebar()">⭐ Favoritas</a>
+        <a onclick="filterNotes('pending'); toggleSidebar()">⏳ Pendientes</a>
+        <a onclick="filterNotes('finished'); toggleSidebar()">✅ Notas finalizadas</a>
+        <a onclick="filterNotes('archived'); toggleSidebar()">📦 Archivadas</a>
+        <a onclick="toggleSidebar()">🏷️ Categorías</a>
     </div>
 
     <div class="main">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰ Menú</button>
+        
         <h1>Agenda digital · Organiza tu día</h1>
-        <p style="color: #7f8c8d;">Tu espacio personal. Organiza tus ideas, sin perder ninguna. Administra tus notas, tareas y proyectos desde un solo lugar.</p>
+        <p style="color: #7f8c8d; margin-top: -10px;">Tu espacio personal. Organiza tus ideas, sin perder ninguna.</p>
         
         <div class="stats">
             <div class="stat-box">Total: <span id="statTotal">0</span> 📄</div>
@@ -88,7 +152,7 @@
     <!-- Modal Nueva Nota -->
     <div id="noteModal" class="modal">
         <div class="modal-content">
-            <h2>Nueva Nota</h2>
+            <h2 style="margin-top: 0;">Nueva Nota</h2>
             <form id="noteForm">
                 <label>Título de la nota *</label>
                 <input type="text" id="noteTitle" required>
@@ -116,8 +180,8 @@
                 <label>Etiquetas (separadas por comas)</label>
                 <input type="text" id="noteTags" placeholder="Ej: urgente, reunion">
                 
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                    <input type="checkbox" id="noteFavorite"> ⭐ Marcar como nota favorita
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal;">
+                    <input type="checkbox" id="noteFavorite" style="width: auto;"> ⭐ Marcar como nota favorita
                 </label>
                 
                 <div class="modal-actions">
@@ -131,18 +195,17 @@
     <!-- Modal Confirmar Eliminación -->
     <div id="deleteModal" class="modal">
         <div class="modal-content">
-            <h2>Confirmar eliminación</h2>
+            <h2 style="margin-top: 0; color: #e74c3c;">Confirmar eliminación</h2>
             <p>¿Estás seguro de que deseas eliminar esta nota permanentemente? Esta acción no se puede deshacer.</p>
             <input type="hidden" id="deleteNoteId">
             <div class="modal-actions">
-                <button type="button" class="btn-secondary" onclick="closeDeleteModal()">Cancelar</button>
-                <button type="button" class="btn-danger" onclick="confirmDelete()">Eliminar definitivamente</button>
+                <button type="button" class="btn-secondary" onclick="closeDeleteModal()" style="flex: 1;">Cancelar</button>
+                <button type="button" class="btn-danger" onclick="confirmDelete()" style="flex: 1;">Eliminar</button>
             </div>
         </div>
     </div>
 
     <script>
-        // TU URL DE GOOGLE APPS SCRIPT
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWOUTnjH17InDQ4K1KK1Jd55-oWRn34vSpjImslemyRyasus0W06Qoj4xZ_F75UB1z/exec";
         let allNotes = [];
 
@@ -151,9 +214,20 @@
             setupEventListeners();
         });
 
+        // Función para el menú responsive
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
         function setupEventListeners() {
             const modal = document.getElementById('noteModal');
-            document.getElementById('openModalBtn').addEventListener('click', () => modal.style.display = 'flex');
+            document.getElementById('openModalBtn').addEventListener('click', () => {
+                modal.style.display = 'flex';
+                if (window.innerWidth <= 768) toggleSidebar();
+            });
             document.getElementById('closeModalBtn').addEventListener('click', () => modal.style.display = 'none');
             
             document.getElementById('noteForm').addEventListener('submit', async (e) => {
@@ -169,10 +243,9 @@
 
         async function loadNotes() {
             const container = document.getElementById('notesContainer');
-            container.innerHTML = '<p>Cargando MIS NOTAS...</p>';
+            container.innerHTML = '<p style="text-align:center; color:#7f8c8d; grid-column: 1/-1;">Cargando MIS NOTAS...</p>';
             
             try {
-                // Se usa GET con parámetro para obtener las notas
                 const response = await fetch(`${SCRIPT_URL}?action=getNotes`);
                 const data = await response.json();
                 
@@ -181,11 +254,11 @@
                     renderNotes(allNotes);
                     updateStats(allNotes);
                 } else {
-                    container.innerHTML = '<p>Error al cargar las notas. Verifica el backend.</p>';
+                    container.innerHTML = '<p style="text-align:center; color:#e74c3c; grid-column: 1/-1;">Error al cargar. Verifica el backend.</p>';
                 }
             } catch (error) {
                 console.error('Error:', error);
-                container.innerHTML = '<p>Error de conexión con el servidor.</p>';
+                container.innerHTML = '<p style="text-align:center; color:#e74c3c; grid-column: 1/-1;">Error de conexión con el servidor.</p>';
             }
         }
 
@@ -194,7 +267,7 @@
             container.innerHTML = '';
             
             if (notes.length === 0) {
-                container.innerHTML = '<p>No hay notas para mostrar.</p>';
+                container.innerHTML = '<p style="text-align:center; color:#7f8c8d; grid-column: 1/-1;">No hay notas para mostrar.</p>';
                 return;
             }
 
@@ -204,11 +277,11 @@
                 card.style.borderLeftColor = note.priority === 'Alta' ? '#e74c3c' : (note.priority === 'Media' ? '#f39c12' : '#2ecc71');
                 card.innerHTML = `
                     <h3>${note.isFavorite ? '⭐ ' : ''}${note.title}</h3>
-                    <p>${note.description}</p>
-                    <small><strong>Categoría:</strong> ${note.category || 'Sin categoría'} | <strong>Prioridad:</strong> ${note.priority}</small><br>
-                    <small><strong>Estado:</strong> ${note.status}</small>
+                    <p style="color: #555; line-height: 1.5;">${note.description}</p>
+                    <small style="color: #7f8c8d;"><strong>Categoría:</strong> ${note.category || 'Sin categoría'} | <strong>Prioridad:</strong> ${note.priority}</small><br>
+                    <small style="color: #7f8c8d;"><strong>Estado:</strong> ${note.status}</small>
                     <div class="note-actions">
-                        <button class="btn-danger" onclick="openDeleteModal('${note.id}')">Eliminar</button>
+                        <button class="btn-danger" onclick="openDeleteModal('${note.id}')">🗑️ Eliminar</button>
                     </div>
                 `;
                 container.appendChild(card);
@@ -226,7 +299,7 @@
         async function saveNote() {
             const noteData = {
                 action: 'saveNote',
-                id: 'note_' + Date.now(), // ID único simple
+                id: 'note_' + Date.now(),
                 title: document.getElementById('noteTitle').value,
                 description: document.getElementById('noteDescription').value,
                 category: document.getElementById('noteCategory').value,
@@ -236,8 +309,11 @@
                 isFavorite: document.getElementById('noteFavorite').checked
             };
 
+            const submitBtn = document.querySelector('#noteForm .btn-primary');
+            submitBtn.textContent = 'Guardando...';
+            submitBtn.disabled = true;
+
             try {
-                // NOTA: No se envía 'Content-Type': 'application/json' a propósito para evitar el preflight CORS de Google Apps Script
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     body: JSON.stringify(noteData)
@@ -245,16 +321,18 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    alert('Nota guardada exitosamente');
                     document.getElementById('noteModal').style.display = 'none';
                     document.getElementById('noteForm').reset();
                     loadNotes();
                 } else {
-                    alert('Error al guardar la nota: ' + (result.message || 'Desconocido'));
+                    alert('Error al guardar: ' + (result.message || 'Desconocido'));
                 }
             } catch (error) {
                 console.error('Error:', error);
                 alert('Error de conexión al guardar.');
+            } finally {
+                submitBtn.textContent = 'Guardar Nota';
+                submitBtn.disabled = false;
             }
         }
 
@@ -270,6 +348,10 @@
 
         async function confirmDelete() {
             const noteId = document.getElementById('deleteNoteId').value;
+            const deleteBtn = document.querySelector('#deleteModal .btn-danger');
+            deleteBtn.textContent = 'Eliminando...';
+            deleteBtn.disabled = true;
+
             try {
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
@@ -278,15 +360,17 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    alert('Nota eliminada');
                     closeDeleteModal();
                     loadNotes();
                 } else {
-                    alert('Error al eliminar');
+                    alert('Error al eliminar: ' + (result.message || 'Desconocido'));
                 }
             } catch (error) {
                 console.error('Error:', error);
                 alert('Error de conexión al eliminar.');
+            } finally {
+                deleteBtn.textContent = 'Eliminar';
+                deleteBtn.disabled = false;
             }
         }
 
@@ -297,6 +381,10 @@
             if (type === 'finished') filtered = allNotes.filter(n => n.status === 'Finalizada');
             if (type === 'archived') filtered = allNotes.filter(n => n.status === 'Archivada' || n.status === 'Archivado');
             renderNotes(filtered);
+            
+            // Actualizar título de la sección
+            const titles = { 'all': 'Todas las notas', 'favorite': 'Notas Favoritas', 'pending': 'Notas Pendientes', 'finished': 'Notas Finalizadas', 'archived': 'Notas Archivadas' };
+            document.querySelector('.main h2').textContent = titles[type] || 'Todas las notas';
         }
 
         function applyFilters() {
@@ -314,6 +402,7 @@
             document.getElementById('filterSort').value = 'recent';
             document.getElementById('filterPriority').value = 'all';
             document.getElementById('filterStatus').value = 'all';
+            document.querySelector('.main h2').textContent = 'Todas las notas';
             renderNotes(allNotes);
         }
     </script>
