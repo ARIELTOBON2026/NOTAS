@@ -8,98 +8,67 @@
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; display: flex; height: 100vh; background-color: #f8f9fa; overflow-x: hidden; }
         
-        /* Sidebar */
         .sidebar { width: 260px; background: #2c3e50; color: white; padding: 20px; display: flex; flex-direction: column; flex-shrink: 0; transition: transform 0.3s ease; }
         .sidebar h2 { margin-top: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
         .sidebar a { color: #ecf0f1; text-decoration: none; padding: 14px 0; display: block; cursor: pointer; transition: 0.3s; font-size: 1rem; border-bottom: 1px solid #34495e; }
         .sidebar a:last-child { border-bottom: none; }
         .sidebar a:hover { color: #3498db; padding-left: 5px; }
         
-        /* Main Content */
         .main { flex: 1; padding: 30px; overflow-y: auto; position: relative; }
         .menu-toggle { display: none; background: #2c3e50; color: white; border: none; padding: 10px 15px; border-radius: 6px; font-size: 1rem; cursor: pointer; margin-bottom: 15px; align-items: center; gap: 8px; }
         
-        /* Stats */
         .stats { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
         .stat-box { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); flex: 1; min-width: 130px; text-align: center; font-weight: bold; font-size: 0.95rem; }
         
-        /* Filters */
         .filters { margin-bottom: 25px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-        .filters select, .filters button { padding: 10px 12px; border-radius: 6px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 14px; }
+        .filters input, .filters select, .filters button { padding: 10px 12px; border-radius: 6px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 16px; }
+        .filters input { flex: 1; min-width: 200px; }
         
-        /* Notes Grid */
         .notes-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
         .note-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 4px solid #3498db; word-wrap: break-word; }
         .note-card h3 { margin-top: 0; color: #2c3e50; font-size: 1.1rem; }
         .note-actions { margin-top: 15px; display: flex; gap: 10px; }
         
-        /* Modales */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
         .modal-content { background: white; padding: 25px; border-radius: 10px; width: 100%; max-width: 500px; box-shadow: 0 5px 25px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
         .modal-content form { display: flex; flex-direction: column; gap: 12px; }
         .modal-content label { font-weight: 600; font-size: 0.9rem; color: #34495e; }
-        /* Font-size 16px previene el zoom automático en iOS al hacer focus */
         .modal-content input, .modal-content textarea, .modal-content select { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; width: 100%; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; }
         
-        /* Botones */
-        .btn-primary { background: #3498db; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; }
-        .btn-danger { background: #e74c3c; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; }
+        .btn-primary { background: #3498db; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; flex: 1; }
+        .btn-edit { background: #f39c12; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; flex: 1; }
+        .btn-danger { background: #e74c3c; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; flex: 1; }
         .btn-secondary { background: #95a5a6; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem; }
-        .btn-primary:active { background: #2980b9; }
-        .btn-danger:active { background: #c0392b; }
+        .btn-primary:active, .btn-edit:active, .btn-danger:active { filter: brightness(0.9); }
 
-        /* Overlay para móvil cuando el menú está abierto */
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
 
-        /* =========================================
-           MEDIA QUERIES PARA DISPOSITIVOS MÓVILES
-           ========================================= */
         @media (max-width: 768px) {
             body { flex-direction: column; }
-            
             .menu-toggle { display: flex; }
-            
-            .sidebar { 
-                position: fixed; 
-                left: -280px; 
-                top: 0; 
-                height: 100%; 
-                z-index: 1001; 
-                width: 280px;
-                box-shadow: 2px 0 10px rgba(0,0,0,0.2);
-            }
+            .sidebar { position: fixed; left: -280px; top: 0; height: 100%; z-index: 1001; width: 280px; box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
             .sidebar.active { left: 0; }
             .sidebar-overlay.active { display: block; }
-            
             .main { padding: 15px; }
             .main h1 { font-size: 1.5rem; }
-            
-            /* Estadísticas en 2 columnas en móvil */
             .stats { gap: 10px; }
             .stat-box { min-width: calc(50% - 5px); padding: 12px 8px; font-size: 0.85rem; }
-            
-            /* Filtros apilados verticalmente para mejor toque */
             .filters { flex-direction: column; align-items: stretch; gap: 10px; }
-            .filters select, .filters button { width: 100%; padding: 12px; }
-            
-            /* Tarjetas de notas más compactas */
+            .filters input, .filters select, .filters button { width: 100%; }
             .notes-list { grid-template-columns: 1fr; gap: 15px; }
             .note-card { padding: 15px; }
             .note-actions { flex-direction: column; }
-            .note-actions button { width: 100%; }
-            
             .modal-content { padding: 20px; }
         }
     </style>
 </head>
 <body>
-    <!-- Overlay para cerrar el menú al hacer clic fuera en móvil -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
     <div class="sidebar" id="sidebar">
         <h2>📝 MIS NOTAS</h2>
-        <a id="openModalBtn" onclick="toggleSidebar()">+ NUEVA NOTA</a>
+        <a id="openModalBtn" onclick="prepareNewNote(); toggleSidebar()">+ NUEVA NOTA</a>
         <a onclick="filterNotes('all'); toggleSidebar()">📋 Todas las notas</a>
         <a onclick="filterNotes('favorite'); toggleSidebar()">⭐ Favoritas</a>
         <a onclick="filterNotes('pending'); toggleSidebar()">⏳ Pendientes</a>
@@ -123,11 +92,7 @@
         </div>
 
         <div class="filters">
-            <select id="filterSort" onchange="applyFilters()">
-                <option value="recent">Ordenar: Más recientes</option>
-                <option value="newest">Fecha de creación (Nuevas)</option>
-                <option value="oldest">Fecha de creación (Antiguas)</option>
-            </select>
+            <input type="text" id="searchInput" placeholder="🔍 Buscar por nombre..." oninput="applyFilters()">
             <select id="filterPriority" onchange="applyFilters()">
                 <option value="all">Todas las prioridades</option>
                 <option value="Alta">Prioridad: Alta</option>
@@ -140,20 +105,21 @@
                 <option value="En proceso">Estado: En proceso</option>
                 <option value="Finalizada">Estado: Finalizada</option>
             </select>
-            <button class="btn-secondary" onclick="resetFilters()">Limpiar filtros</button>
+            <button class="btn-secondary" onclick="resetFilters()">Limpiar</button>
         </div>
 
-        <h2>Todas las notas</h2>
+        <h2 id="sectionTitle">Todas las notas</h2>
         <div id="notesContainer" class="notes-list">
-            <p>Cargando MIS NOTAS...</p>
+            <p style="text-align:center; color:#7f8c8d; grid-column: 1/-1;">Cargando MIS NOTAS...</p>
         </div>
     </div>
 
-    <!-- Modal Nueva Nota -->
+    <!-- Modal Nueva/Editar Nota -->
     <div id="noteModal" class="modal">
         <div class="modal-content">
-            <h2 style="margin-top: 0;">Nueva Nota</h2>
+            <h2 id="modalTitle" style="margin-top: 0;">Nueva Nota</h2>
             <form id="noteForm">
+                <input type="hidden" id="noteId">
                 <label>Título de la nota *</label>
                 <input type="text" id="noteTitle" required>
                 
@@ -185,8 +151,8 @@
                 </label>
                 
                 <div class="modal-actions">
-                    <button type="button" class="btn-secondary" id="closeModalBtn">Cerrar</button>
-                    <button type="submit" class="btn-primary">Guardar Nota</button>
+                    <button type="button" class="btn-secondary" id="closeModalBtn" style="flex:1;">Cerrar</button>
+                    <button type="submit" class="btn-primary" style="flex:1;">Guardar Nota</button>
                 </div>
             </form>
         </div>
@@ -206,7 +172,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWOUTnjH17InDQ4K1KK1Jd55-oWRn34vSpjImslemyRyasus0W06Qoj4xZ_F75UB1z/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzI6hiSRGIGV8aPz4T7RT634ACsIaB8kLSf1YE1KVM3nu6VgGU5fuVpGuJEHk_-8Wk/exec";
         let allNotes = [];
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -214,31 +180,40 @@
             setupEventListeners();
         });
 
-        // Función para el menú responsive
         function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
         }
 
         function setupEventListeners() {
             const modal = document.getElementById('noteModal');
-            document.getElementById('openModalBtn').addEventListener('click', () => {
-                modal.style.display = 'flex';
-                if (window.innerWidth <= 768) toggleSidebar();
+            document.getElementById('closeModalBtn').addEventListener('click', () => {
+                modal.style.display = 'none';
+                resetForm();
             });
-            document.getElementById('closeModalBtn').addEventListener('click', () => modal.style.display = 'none');
             
             document.getElementById('noteForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                await saveNote();
+                await saveOrUpdateNote();
             });
 
             window.addEventListener('click', (e) => {
-                if (e.target === modal) modal.style.display = 'none';
+                if (e.target === modal) { modal.style.display = 'none'; resetForm(); }
                 if (e.target === document.getElementById('deleteModal')) closeDeleteModal();
             });
+        }
+
+        function prepareNewNote() {
+            resetForm();
+            document.getElementById('noteModal').style.display = 'flex';
+        }
+
+        function resetForm() {
+            document.getElementById('noteForm').reset();
+            document.getElementById('noteId').value = '';
+            document.getElementById('modalTitle').textContent = 'Nueva Nota';
+            document.querySelector('#noteForm button[type="submit"]').textContent = 'Guardar Nota';
+            document.querySelector('#noteForm button[type="submit"]').className = 'btn-primary';
         }
 
         async function loadNotes() {
@@ -251,7 +226,7 @@
                 
                 if (data.success) {
                     allNotes = data.notes || [];
-                    renderNotes(allNotes);
+                    applyFilters(); // Usa applyFilters para respetar cualquier búsqueda activa
                     updateStats(allNotes);
                 } else {
                     container.innerHTML = '<p style="text-align:center; color:#e74c3c; grid-column: 1/-1;">Error al cargar. Verifica el backend.</p>';
@@ -267,7 +242,7 @@
             container.innerHTML = '';
             
             if (notes.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:#7f8c8d; grid-column: 1/-1;">No hay notas para mostrar.</p>';
+                container.innerHTML = '<p style="text-align:center; color:#7f8c8d; grid-column: 1/-1;">No hay notas que coincidan.</p>';
                 return;
             }
 
@@ -281,6 +256,7 @@
                     <small style="color: #7f8c8d;"><strong>Categoría:</strong> ${note.category || 'Sin categoría'} | <strong>Prioridad:</strong> ${note.priority}</small><br>
                     <small style="color: #7f8c8d;"><strong>Estado:</strong> ${note.status}</small>
                     <div class="note-actions">
+                        <button class="btn-edit" onclick="openEditModal('${note.id}')">✏️ Editar</button>
                         <button class="btn-danger" onclick="openDeleteModal('${note.id}')">🗑️ Eliminar</button>
                     </div>
                 `;
@@ -288,18 +264,35 @@
             });
         }
 
-        function updateStats(notes) {
-            document.getElementById('statTotal').textContent = notes.length;
-            document.getElementById('statPending').textContent = notes.filter(n => n.status === 'Pendiente').length;
-            document.getElementById('statFinished').textContent = notes.filter(n => n.status === 'Finalizada').length;
-            document.getElementById('statFavorite').textContent = notes.filter(n => n.isFavorite).length;
-            document.getElementById('statArchived').textContent = notes.filter(n => n.status === 'Archivada' || n.status === 'Archivado').length;
+        function openEditModal(noteId) {
+            const note = allNotes.find(n => n.id === noteId);
+            if (!note) return;
+
+            document.getElementById('noteId').value = note.id;
+            document.getElementById('modalTitle').textContent = 'Editar Nota';
+            document.getElementById('noteTitle').value = note.title;
+            document.getElementById('noteDescription').value = note.description;
+            document.getElementById('noteCategory').value = note.category || '';
+            document.getElementById('notePriority').value = note.priority;
+            document.getElementById('noteStatus').value = note.status;
+            document.getElementById('noteTags').value = note.tags || '';
+            document.getElementById('noteFavorite').checked = note.isFavorite;
+            
+            const submitBtn = document.querySelector('#noteForm button[type="submit"]');
+            submitBtn.textContent = 'Actualizar Nota';
+            submitBtn.className = 'btn-edit'; // Cambia color a naranja para indicar edición
+
+            document.getElementById('noteModal').style.display = 'flex';
+            if (window.innerWidth <= 768) toggleSidebar();
         }
 
-        async function saveNote() {
+        async function saveOrUpdateNote() {
+            const noteId = document.getElementById('noteId').value;
+            const isEditing = noteId !== '';
+            
             const noteData = {
-                action: 'saveNote',
-                id: 'note_' + Date.now(),
+                action: isEditing ? 'updateNote' : 'saveNote',
+                id: isEditing ? noteId : 'note_' + Date.now(),
                 title: document.getElementById('noteTitle').value,
                 description: document.getElementById('noteDescription').value,
                 category: document.getElementById('noteCategory').value,
@@ -309,8 +302,9 @@
                 isFavorite: document.getElementById('noteFavorite').checked
             };
 
-            const submitBtn = document.querySelector('#noteForm .btn-primary');
-            submitBtn.textContent = 'Guardando...';
+            const submitBtn = document.querySelector('#noteForm button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = isEditing ? 'Actualizando...' : 'Guardando...';
             submitBtn.disabled = true;
 
             try {
@@ -322,18 +316,26 @@
                 
                 if (result.success) {
                     document.getElementById('noteModal').style.display = 'none';
-                    document.getElementById('noteForm').reset();
+                    resetForm();
                     loadNotes();
                 } else {
-                    alert('Error al guardar: ' + (result.message || 'Desconocido'));
+                    alert('Error: ' + (result.message || 'Desconocido'));
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error de conexión al guardar.');
+                alert('Error de conexión.');
             } finally {
-                submitBtn.textContent = 'Guardar Nota';
+                submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
             }
+        }
+
+        function updateStats(notes) {
+            document.getElementById('statTotal').textContent = notes.length;
+            document.getElementById('statPending').textContent = notes.filter(n => n.status === 'Pendiente').length;
+            document.getElementById('statFinished').textContent = notes.filter(n => n.status === 'Finalizada').length;
+            document.getElementById('statFavorite').textContent = notes.filter(n => n.isFavorite).length;
+            document.getElementById('statArchived').textContent = notes.filter(n => n.status === 'Archivada' || n.status === 'Archivado').length;
         }
 
         function openDeleteModal(noteId) {
@@ -376,22 +378,29 @@
 
         function filterNotes(type) {
             let filtered = allNotes;
-            if (type === 'favorite') filtered = allNotes.filter(n => n.isFavorite);
-            if (type === 'pending') filtered = allNotes.filter(n => n.status === 'Pendiente');
-            if (type === 'finished') filtered = allNotes.filter(n => n.status === 'Finalizada');
-            if (type === 'archived') filtered = allNotes.filter(n => n.status === 'Archivada' || n.status === 'Archivado');
-            renderNotes(filtered);
+            if (type === 'favorite') filtered = filtered.filter(n => n.isFavorite);
+            if (type === 'pending') filtered = filtered.filter(n => n.status === 'Pendiente');
+            if (type === 'finished') filtered = filtered.filter(n => n.status === 'Finalizada');
+            if (type === 'archived') filtered = filtered.filter(n => n.status === 'Archivada' || n.status === 'Archivado');
             
-            // Actualizar título de la sección
             const titles = { 'all': 'Todas las notas', 'favorite': 'Notas Favoritas', 'pending': 'Notas Pendientes', 'finished': 'Notas Finalizadas', 'archived': 'Notas Archivadas' };
-            document.querySelector('.main h2').textContent = titles[type] || 'Todas las notas';
+            document.getElementById('sectionTitle').textContent = titles[type] || 'Todas las notas';
+            
+            // Mantener el filtro de búsqueda si existe
+            applyFilters(filtered);
         }
 
-        function applyFilters() {
+        function applyFilters(baseNotes = null) {
+            const notesToFilter = baseNotes !== null ? baseNotes : allNotes;
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
             const priority = document.getElementById('filterPriority').value;
             const status = document.getElementById('filterStatus').value;
             
-            let filtered = allNotes;
+            let filtered = notesToFilter;
+            
+            if (searchText) {
+                filtered = filtered.filter(n => n.title.toLowerCase().includes(searchText));
+            }
             if (priority !== 'all') filtered = filtered.filter(n => n.priority === priority);
             if (status !== 'all') filtered = filtered.filter(n => n.status === status);
             
@@ -399,10 +408,10 @@
         }
 
         function resetFilters() {
-            document.getElementById('filterSort').value = 'recent';
+            document.getElementById('searchInput').value = '';
             document.getElementById('filterPriority').value = 'all';
             document.getElementById('filterStatus').value = 'all';
-            document.querySelector('.main h2').textContent = 'Todas las notas';
+            document.getElementById('sectionTitle').textContent = 'Todas las notas';
             renderNotes(allNotes);
         }
     </script>
