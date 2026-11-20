@@ -172,7 +172,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzI6hiSRGIGV8aPz4T7RT634ACsIaB8kLSf1YE1KVM3nu6VgGU5fuVpGuJEHk_-8Wk/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzySTC_ZdiHAZt0mjw3bEcsykw0yVfHh9sQYUHSv7Iu5fMsF_szv7kfylkxUjCvERcw/exec";
         let allNotes = [];
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -212,8 +212,9 @@
             document.getElementById('noteForm').reset();
             document.getElementById('noteId').value = '';
             document.getElementById('modalTitle').textContent = 'Nueva Nota';
-            document.querySelector('#noteForm button[type="submit"]').textContent = 'Guardar Nota';
-            document.querySelector('#noteForm button[type="submit"]').className = 'btn-primary';
+            const submitBtn = document.querySelector('#noteForm button[type="submit"]');
+            submitBtn.textContent = 'Guardar Nota';
+            submitBtn.className = 'btn-primary';
         }
 
         async function loadNotes() {
@@ -226,7 +227,7 @@
                 
                 if (data.success) {
                     allNotes = data.notes || [];
-                    applyFilters(); // Usa applyFilters para respetar cualquier búsqueda activa
+                    applyFilters();
                     updateStats(allNotes);
                 } else {
                     container.innerHTML = '<p style="text-align:center; color:#e74c3c; grid-column: 1/-1;">Error al cargar. Verifica el backend.</p>';
@@ -264,6 +265,7 @@
             });
         }
 
+        // ✅ FUNCIÓN CORREGIDA: Ya no abre el menú lateral en móvil
         function openEditModal(noteId) {
             const note = allNotes.find(n => n.id === noteId);
             if (!note) return;
@@ -280,10 +282,9 @@
             
             const submitBtn = document.querySelector('#noteForm button[type="submit"]');
             submitBtn.textContent = 'Actualizar Nota';
-            submitBtn.className = 'btn-edit'; // Cambia color a naranja para indicar edición
+            submitBtn.className = 'btn-edit';
 
             document.getElementById('noteModal').style.display = 'flex';
-            if (window.innerWidth <= 768) toggleSidebar();
         }
 
         async function saveOrUpdateNote() {
@@ -386,7 +387,6 @@
             const titles = { 'all': 'Todas las notas', 'favorite': 'Notas Favoritas', 'pending': 'Notas Pendientes', 'finished': 'Notas Finalizadas', 'archived': 'Notas Archivadas' };
             document.getElementById('sectionTitle').textContent = titles[type] || 'Todas las notas';
             
-            // Mantener el filtro de búsqueda si existe
             applyFilters(filtered);
         }
 
