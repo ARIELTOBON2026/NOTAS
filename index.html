@@ -21,12 +21,63 @@
         .stat-box { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); flex: 1; min-width: 130px; text-align: center; font-weight: bold; font-size: 0.95rem; }
         
         .filters { margin-bottom: 25px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-        .filters input, .filters select, .filters button { padding: 10px 12px; border-radius: 6px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 16px; }
+        .filters input, .filters select { padding: 10px 12px; border-radius: 6px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 16px; }
         .filters input { flex: 1; min-width: 200px; }
         
+        .btn-clear-filters { 
+            background: #e74c3c; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-clear-filters:hover { background: #c0392b; transform: scale(1.05); }
+        .btn-clear-filters.has-filters { 
+            background: #f39c12; 
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(243, 156, 18, 0); }
+        }
+        
         .notes-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .note-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 4px solid #3498db; word-wrap: break-word; }
+        .note-card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
+            border-left: 4px solid #3498db; 
+            word-wrap: break-word;
+            transition: transform 0.2s;
+        }
+        .note-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .note-card h3 { margin-top: 0; color: #2c3e50; font-size: 1.1rem; }
+        .note-card .note-info { 
+            margin: 12px 0; 
+            padding: 10px; 
+            background: #f8f9fa; 
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .note-card .note-info div { margin: 5px 0; }
+        .note-card .note-tags { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 5px; 
+            margin-top: 10px; 
+        }
+        .note-card .tag { 
+            background: #3498db; 
+            color: white; 
+            padding: 3px 8px; 
+            border-radius: 12px; 
+            font-size: 0.75rem; 
+        }
         .note-actions { margin-top: 15px; display: flex; gap: 10px; }
         
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
@@ -34,6 +85,12 @@
         .modal-content form { display: flex; flex-direction: column; gap: 12px; }
         .modal-content label { font-weight: 600; font-size: 0.9rem; color: #34495e; }
         .modal-content input, .modal-content textarea, .modal-content select { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; width: 100%; }
+        .modal-content .form-section { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 6px; 
+            margin: 10px 0;
+        }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; }
         
         .btn-primary { background: #3498db; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; flex: 1; }
@@ -55,7 +112,7 @@
             .stats { gap: 10px; }
             .stat-box { min-width: calc(50% - 5px); padding: 12px 8px; font-size: 0.85rem; }
             .filters { flex-direction: column; align-items: stretch; gap: 10px; }
-            .filters input, .filters select, .filters button { width: 100%; }
+            .filters input, .filters select, .btn-clear-filters { width: 100%; }
             .notes-list { grid-template-columns: 1fr; gap: 15px; }
             .note-card { padding: 15px; }
             .note-actions { flex-direction: column; }
@@ -105,7 +162,7 @@
                 <option value="En proceso">Estado: En proceso</option>
                 <option value="Finalizada">Estado: Finalizada</option>
             </select>
-            <button class="btn-secondary" onclick="resetFilters()">Limpiar</button>
+            <button class="btn-clear-filters" id="btnClearFilters" onclick="resetFilters()">🗑️ Limpiar filtros</button>
         </div>
 
         <h2 id="sectionTitle">Todas las notas</h2>
@@ -120,35 +177,42 @@
             <h2 id="modalTitle" style="margin-top: 0;">Nueva Nota</h2>
             <form id="noteForm">
                 <input type="hidden" id="noteId">
-                <label>Título de la nota *</label>
-                <input type="text" id="noteTitle" required>
                 
-                <label>Descripción o contenido *</label>
-                <textarea id="noteDescription" rows="4" required></textarea>
+                <div class="form-section">
+                    <label>Título de la nota *</label>
+                    <input type="text" id="noteTitle" required>
+                    
+                    <label style="margin-top: 12px;">Descripción o contenido *</label>
+                    <textarea id="noteDescription" rows="4" required></textarea>
+                </div>
                 
-                <label>Categoría</label>
-                <input type="text" id="noteCategory" placeholder="Ej: Trabajo, Personal">
+                <div class="form-section">
+                    <label>Categoría</label>
+                    <input type="text" id="noteCategory" placeholder="Ej: Trabajo, Personal">
+                    
+                    <label style="margin-top: 12px;">Prioridad</label>
+                    <select id="notePriority">
+                        <option value="Alta">Alta</option>
+                        <option value="Media" selected>Media</option>
+                        <option value="Baja">Baja</option>
+                    </select>
+                    
+                    <label style="margin-top: 12px;">Estado</label>
+                    <select id="noteStatus">
+                        <option value="Pendiente" selected>Pendiente</option>
+                        <option value="En proceso">En proceso</option>
+                        <option value="Finalizada">Finalizada</option>
+                    </select>
+                </div>
                 
-                <label>Prioridad</label>
-                <select id="notePriority">
-                    <option value="Alta">Alta</option>
-                    <option value="Media" selected>Media</option>
-                    <option value="Baja">Baja</option>
-                </select>
-                
-                <label>Estado</label>
-                <select id="noteStatus">
-                    <option value="Pendiente" selected>Pendiente</option>
-                    <option value="En proceso">En proceso</option>
-                    <option value="Finalizada">Finalizada</option>
-                </select>
-                
-                <label>Etiquetas (separadas por comas)</label>
-                <input type="text" id="noteTags" placeholder="Ej: urgente, reunion">
-                
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal;">
-                    <input type="checkbox" id="noteFavorite" style="width: auto;"> ⭐ Marcar como nota favorita
-                </label>
+                <div class="form-section">
+                    <label>Etiquetas (separadas por comas)</label>
+                    <input type="text" id="noteTags" placeholder="Ej: urgente, reunion">
+                    
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal; margin-top: 12px;">
+                        <input type="checkbox" id="noteFavorite" style="width: auto;"> ⭐ Marcar como nota favorita
+                    </label>
+                </div>
                 
                 <div class="modal-actions">
                     <button type="button" class="btn-secondary" id="closeModalBtn" style="flex:1;">Cerrar</button>
@@ -172,7 +236,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzySTC_ZdiHAZt0mjw3bEcsykw0yVfHh9sQYUHSv7Iu5fMsF_szv7kfylkxUjCvERcw/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWOUTnjH17InDQ4K1KK1Jd55-oWRn34vSpjImslemyRyasus0W06Qoj4xZ_F75UB1z/exec";
         let allNotes = [];
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -251,11 +315,22 @@
                 const card = document.createElement('div');
                 card.className = 'note-card';
                 card.style.borderLeftColor = note.priority === 'Alta' ? '#e74c3c' : (note.priority === 'Media' ? '#f39c12' : '#2ecc71');
+                
+                const tagsHtml = note.tags ? 
+                    `<div class="note-tags">${note.tags.split(',').map(t => `<span class="tag">${t.trim()}</span>`).join('')}</div>` : '';
+                
                 card.innerHTML = `
                     <h3>${note.isFavorite ? '⭐ ' : ''}${note.title}</h3>
-                    <p style="color: #555; line-height: 1.5;">${note.description}</p>
-                    <small style="color: #7f8c8d;"><strong>Categoría:</strong> ${note.category || 'Sin categoría'} | <strong>Prioridad:</strong> ${note.priority}</small><br>
-                    <small style="color: #7f8c8d;"><strong>Estado:</strong> ${note.status}</small>
+                    <p style="color: #555; line-height: 1.5; margin: 10px 0;">${note.description}</p>
+                    
+                    <div class="note-info">
+                        <div><strong>📁 Categoría:</strong> ${note.category || 'Sin categoría'}</div>
+                        <div><strong>🎯 Prioridad:</strong> ${note.priority}</div>
+                        <div><strong>📊 Estado:</strong> ${note.status}</div>
+                    </div>
+                    
+                    ${tagsHtml}
+                    
                     <div class="note-actions">
                         <button class="btn-edit" onclick="openEditModal('${note.id}')">✏️ Editar</button>
                         <button class="btn-danger" onclick="openDeleteModal('${note.id}')">🗑️ Eliminar</button>
@@ -265,7 +340,6 @@
             });
         }
 
-        // ✅ FUNCIÓN CORREGIDA: Ya no abre el menú lateral en móvil
         function openEditModal(noteId) {
             const note = allNotes.find(n => n.id === noteId);
             if (!note) return;
@@ -405,6 +479,7 @@
             if (status !== 'all') filtered = filtered.filter(n => n.status === status);
             
             renderNotes(filtered);
+            updateClearFiltersButton();
         }
 
         function resetFilters() {
@@ -413,6 +488,23 @@
             document.getElementById('filterStatus').value = 'all';
             document.getElementById('sectionTitle').textContent = 'Todas las notas';
             renderNotes(allNotes);
+            updateClearFiltersButton();
+        }
+
+        function updateClearFiltersButton() {
+            const btn = document.getElementById('btnClearFilters');
+            const hasFilters = 
+                document.getElementById('searchInput').value !== '' ||
+                document.getElementById('filterPriority').value !== 'all' ||
+                document.getElementById('filterStatus').value !== 'all';
+            
+            if (hasFilters) {
+                btn.classList.add('has-filters');
+                btn.textContent = '🗑️ Limpiar filtros activos';
+            } else {
+                btn.classList.remove('has-filters');
+                btn.textContent = '🗑️ Limpiar filtros';
+            }
         }
     </script>
 </body>
