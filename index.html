@@ -10,9 +10,9 @@
         
         .sidebar { width: 260px; background: #2c3e50; color: white; padding: 20px; display: flex; flex-direction: column; flex-shrink: 0; transition: transform 0.3s ease; }
         .sidebar h2 { margin-top: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
-        .sidebar a { color: #ecf0f1; text-decoration: none; padding: 14px 0; display: block; cursor: pointer; transition: 0.3s; font-size: 1rem; border-bottom: 1px solid #34495e; }
-        .sidebar a:last-child { border-bottom: none; }
-        .sidebar a:hover { color: #3498db; padding-left: 5px; }
+        .sidebar > a { color: #ecf0f1; text-decoration: none; padding: 14px 0; display: block; cursor: pointer; transition: 0.3s; font-size: 1rem; border-bottom: 1px solid #34495e; }
+        .sidebar > a:last-of-type { border-bottom: none; }
+        .sidebar > a:hover { color: #3498db; padding-left: 5px; }
         
         .main { flex: 1; padding: 30px; overflow-y: auto; position: relative; }
         .menu-toggle { display: none; background: #2c3e50; color: white; border: none; padding: 10px 15px; border-radius: 6px; font-size: 1rem; cursor: pointer; margin-bottom: 15px; align-items: center; gap: 8px; }
@@ -58,7 +58,6 @@
         .note-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .note-card h3 { margin-top: 0; color: #2c3e50; font-size: 1.2rem; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
         
-        /* NUEVO: Estilos para el contenido formateado */
         .note-description { 
             color: #555; 
             line-height: 1.6; 
@@ -150,7 +149,15 @@
         <a onclick="filterNotes('pending'); toggleSidebar()">⏳ Pendientes</a>
         <a onclick="filterNotes('finished'); toggleSidebar()">✅ Notas finalizadas</a>
         <a onclick="filterNotes('archived'); toggleSidebar()">📦 Archivadas</a>
-        <a onclick="toggleSidebar()">🏷️ Categorías</a>
+        
+        <!-- SECCIÓN DE CATEGORÍAS DINÁMICA -->
+        <a onclick="toggleCategoriesSidebar()" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+            <span>🏷️ Categorías</span>
+            <span id="catToggleIcon" style="transition: transform 0.3s; font-size: 0.8rem;">▼</span>
+        </a>
+        <div id="sidebarCategoriesList" style="display: none; padding-left: 15px; border-left: 2px solid #34495e; margin-left: 10px; margin-top: 5px;">
+            <!-- Las categorías se inyectan aquí con JS -->
+        </div>
     </div>
 
     <div class="main">
@@ -168,7 +175,7 @@
         </div>
 
         <div class="filters">
-            <input type="text" id="searchInput" placeholder="🔍 Buscar por nombre..." oninput="applyFilters()">
+            <input type="text" id="searchInput" placeholder="🔍 Buscar por nombre, categoría..." oninput="applyFilters()">
             <select id="filterPriority" onchange="applyFilters()">
                 <option value="all">Todas las prioridades</option>
                 <option value="Alta">Prioridad: Alta</option>
@@ -180,6 +187,10 @@
                 <option value="Pendiente">Estado: Pendiente</option>
                 <option value="En proceso">Estado: En proceso</option>
                 <option value="Finalizada">Estado: Finalizada</option>
+            </select>
+            <!-- NUEVO: Filtro de Categoría -->
+            <select id="filterCategory" onchange="applyFilters()">
+                <option value="all">Todas las categorías</option>
             </select>
             <button class="btn-clear-filters" id="btnClearFilters" onclick="resetFilters()">🗑️ Limpiar filtros</button>
         </div>
@@ -207,7 +218,9 @@
                 
                 <div class="form-section">
                     <label>Categoría</label>
-                    <input type="text" id="noteCategory" placeholder="Ej: Trabajo, Personal">
+                    <!-- NUEVO: Autocompletado con datalist -->
+                    <input type="text" id="noteCategory" placeholder="Ej: Trabajo, Personal" list="categoryDatalist">
+                    <datalist id="categoryDatalist"></datalist>
                     
                     <label style="margin-top: 12px;">Prioridad</label>
                     <select id="notePriority">
@@ -310,6 +323,7 @@
                 
                 if (data.success) {
                     allNotes = data.notes || [];
+                    updateCategoriesList(); // <-- Actualiza las categorías al cargar
                     applyFilters();
                     updateStats(allNotes);
                 } else {
@@ -321,7 +335,59 @@
             }
         }
 
-        // NUEVA FUNCIÓN: Formatea el texto de la descripción
+        // NUEVA FUNCIÓN: Actualiza listas de categorías en sidebar, filtro y autocompletado
+        function updateCategoriesList() {
+            const categories = [...new Set(allNotes.map(n => n.category).filter(c => c && c.trim() !== ''))].sort();
+            
+            // 1. Actualizar barra lateral
+            const sidebarList = document.getElementById('sidebarCategoriesList');
+            if (sidebarList) {
+                sidebarList.innerHTML = categories.length > 0 
+                    ? categories.map(cat => `<a onclick="filterByCategory('${cat.replace(/'/g, "\\'")}'); toggleSidebar()" style="padding: 10px 0; font-size: 0.9rem; cursor: pointer; display: block; color: #bdc3c7; text-decoration: none; border-bottom: none;">📁 ${cat}</a>`).join('')
+                    : '<a style="padding: 10px 0; font-size: 0.9rem; color: #95a5a6; display: block;">Sin categorías</a>';
+            }
+
+            // 2. Actualizar filtro desplegable
+            const filterSelect = document.getElementById('filterCategory');
+            if (filterSelect) {
+                const currentValue = filterSelect.value;
+                filterSelect.innerHTML = '<option value="all">Todas las categorías</option>' + 
+                    categories.map(cat => `<option value="${cat.replace(/"/g, '&quot;')}">${cat}</option>`).join('');
+                
+                // Restaurar selección si aún existe
+                if (categories.includes(currentValue)) {
+                    filterSelect.value = currentValue;
+                } else {
+                    filterSelect.value = 'all';
+                }
+            }
+
+            // 3. Actualizar datalist para autocompletado en el formulario
+            const datalist = document.getElementById('categoryDatalist');
+            if (datalist) {
+                datalist.innerHTML = categories.map(cat => `<option value="${cat.replace(/"/g, '&quot;')}">`).join('');
+            }
+        }
+
+        function toggleCategoriesSidebar() {
+            const list = document.getElementById('sidebarCategoriesList');
+            const icon = document.getElementById('catToggleIcon');
+            if (list.style.display === 'none') {
+                list.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+                updateCategoriesList();
+            } else {
+                list.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function filterByCategory(category) {
+            document.getElementById('filterCategory').value = category;
+            document.getElementById('sectionTitle').textContent = `Categoría: ${category}`;
+            applyFilters();
+        }
+
         function formatDescription(text) {
             if (!text) return '<p>Sin descripción</p>';
             
@@ -333,7 +399,6 @@
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i].trim();
                 
-                // Línea vacía = nuevo párrafo
                 if (line === '') {
                     if (inList) {
                         html += listType === 'ul' ? '</ul>' : '</ol>';
@@ -342,7 +407,6 @@
                     continue;
                 }
                 
-                // Detectar lista con guiones
                 if (line.startsWith('- ') || line.startsWith('• ')) {
                     if (!inList || listType !== 'ul') {
                         if (inList) html += listType === 'ul' ? '</ul>' : '</ol>';
@@ -352,7 +416,6 @@
                     }
                     html += `<li>${line.substring(2)}</li>`;
                 }
-                // Detectar lista numerada
                 else if (/^\d+[\.\)]\s/.test(line)) {
                     if (!inList || listType !== 'ol') {
                         if (inList) html += listType === 'ul' ? '</ul>' : '</ol>';
@@ -362,7 +425,6 @@
                     }
                     html += `<li>${line.replace(/^\d+[\.\)]\s/, '')}</li>`;
                 }
-                // Texto normal
                 else {
                     if (inList) {
                         html += listType === 'ul' ? '</ul>' : '</ol>';
@@ -372,7 +434,6 @@
                 }
             }
             
-            // Cerrar lista si quedó abierta
             if (inList) {
                 html += listType === 'ul' ? '</ul>' : '</ol>';
             }
@@ -397,7 +458,6 @@
                 const tagsHtml = note.tags ? 
                     `<div class="note-tags">${note.tags.split(',').map(t => `<span class="tag">${t.trim()}</span>`).join('')}</div>` : '';
                 
-                // Usar la nueva función para formatear la descripción
                 const formattedDescription = formatDescription(note.description);
                 
                 card.innerHTML = `
@@ -542,6 +602,12 @@
             const titles = { 'all': 'Todas las notas', 'favorite': 'Notas Favoritas', 'pending': 'Notas Pendientes', 'finished': 'Notas Finalizadas', 'archived': 'Notas Archivadas' };
             document.getElementById('sectionTitle').textContent = titles[type] || 'Todas las notas';
             
+            // Resetear otros filtros al usar los accesos rápidos de la barra lateral
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterPriority').value = 'all';
+            document.getElementById('filterStatus').value = 'all';
+            document.getElementById('filterCategory').value = 'all';
+            
             applyFilters(filtered);
         }
 
@@ -550,14 +616,21 @@
             const searchText = document.getElementById('searchInput').value.toLowerCase();
             const priority = document.getElementById('filterPriority').value;
             const status = document.getElementById('filterStatus').value;
+            const category = document.getElementById('filterCategory').value;
             
             let filtered = notesToFilter;
             
             if (searchText) {
-                filtered = filtered.filter(n => n.title.toLowerCase().includes(searchText));
+                filtered = filtered.filter(n => 
+                    n.title.toLowerCase().includes(searchText) || 
+                    (n.description && n.description.toLowerCase().includes(searchText)) ||
+                    (n.category && n.category.toLowerCase().includes(searchText)) ||
+                    (n.tags && n.tags.toLowerCase().includes(searchText))
+                );
             }
             if (priority !== 'all') filtered = filtered.filter(n => n.priority === priority);
             if (status !== 'all') filtered = filtered.filter(n => n.status === status);
+            if (category !== 'all') filtered = filtered.filter(n => n.category === category);
             
             renderNotes(filtered);
             updateClearFiltersButton();
@@ -567,6 +640,7 @@
             document.getElementById('searchInput').value = '';
             document.getElementById('filterPriority').value = 'all';
             document.getElementById('filterStatus').value = 'all';
+            document.getElementById('filterCategory').value = 'all';
             document.getElementById('sectionTitle').textContent = 'Todas las notas';
             renderNotes(allNotes);
             updateClearFiltersButton();
@@ -577,7 +651,8 @@
             const hasFilters = 
                 document.getElementById('searchInput').value !== '' ||
                 document.getElementById('filterPriority').value !== 'all' ||
-                document.getElementById('filterStatus').value !== 'all';
+                document.getElementById('filterStatus').value !== 'all' ||
+                document.getElementById('filterCategory').value !== 'all';
             
             if (hasFilters) {
                 btn.classList.add('has-filters');
